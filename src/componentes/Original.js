@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View, Text, TouchableOpacity, Image, StyleSheet,
-  Alert, ActivityIndicator, ScrollView
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-:.\' '.split('');
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-:\'. '.split('');
 const MAX_ATTEMPTS = 5;
 
 export default function Original() {
@@ -19,16 +16,13 @@ export default function Original() {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [loading, setLoading] = useState(true);
-
   const [userWin, setUserWin] = useState(0);
   const [userLose, setUserLose] = useState(0);
   const [uid, setUid] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUid(user.uid);
-      }
+      if (user) setUid(user.uid);
     });
     return unsubscribe;
   }, []);
@@ -44,18 +38,33 @@ export default function Original() {
         setUserLose(data.perdidos || 0);
       } else {
         await setDoc(docRef, { ganados: 0, perdidos: 0 });
-        setUserWin(0);
-        setUserLose(0);
       }
       setLoading(false);
     };
     traerDatos();
   }, [uid]);
 
+  useEffect(() => {
+    getRandomPokemon();
+  }, []);
+
+  const getRandomPokemon = async () => {
+    const id = Math.floor(Math.random() * 1025) + 1;
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+      const data = await res.json();
+      setPokemonName(data.name.toUpperCase());
+      setPokemonId(data.id);
+      setPokemonImage(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error al obtener el Pokémon:', err);
+    }
+  };
+
   const guardarResultado = async (acierto) => {
     if (!uid) return;
     const fecha = new Date().toISOString();
-
     const resultado = {
       uid,
       pokemon: pokemonName,
@@ -63,10 +72,8 @@ export default function Original() {
       errores: acierto ? 0 : 1,
       fecha,
     };
-
     try {
       await setDoc(doc(db, 'resultados', `${uid}_${fecha}`), resultado);
-
       const docRef = doc(db, 'usuarios', uid);
       await updateDoc(docRef, {
         ganados: acierto ? userWin + 1 : userWin,
@@ -77,26 +84,8 @@ export default function Original() {
     }
   };
 
-  useEffect(() => {
-    const getRandomPokemon = async () => {
-      const id = Math.floor(Math.random() * 1025) + 1;
-      try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-        const data = await response.json();
-        setPokemonName(data.name.toUpperCase());
-        setPokemonId(data.id);
-        setPokemonImage(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error al obtener el Pokémon:', err);
-      }
-    };
-    getRandomPokemon();
-  }, []);
-
   const handleLetterClick = async (letter) => {
     if (guessedLetters.includes(letter) || gameOver || gameWon) return;
-
     const updatedGuessed = [...guessedLetters, letter];
     setGuessedLetters(updatedGuessed);
 
@@ -131,19 +120,7 @@ export default function Original() {
     setGameOver(false);
     setGameWon(false);
     setLoading(true);
-    setPokemonName('');
-    setPokemonId('');
-    setPokemonImage('');
-
-    const id = Math.floor(Math.random() * 1025) + 1;
-    fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPokemonName(data.name.toUpperCase());
-        setPokemonId(data.id);
-        setPokemonImage(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`);
-        setLoading(false);
-      });
+    getRandomPokemon();
   };
 
   return (
@@ -164,23 +141,15 @@ export default function Original() {
                 key={letter}
                 onPress={() => handleLetterClick(letter)}
                 disabled={guessedLetters.includes(letter) || gameOver || gameWon}
-                style={[
-                  styles.key,
-                  guessedLetters.includes(letter) && styles.keyDisabled,
-                ]}
-              >
+                style={[styles.key, guessedLetters.includes(letter) && styles.keyDisabled]}>
                 <Text>{letter}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={styles.attempts}>
-            Fallos: {wrongGuesses} / {MAX_ATTEMPTS}
-          </Text>
+          <Text style={styles.attempts}>Fallos: {wrongGuesses} / {MAX_ATTEMPTS}</Text>
 
-          {gameOver && (
-            <Text style={styles.lost}>💀 ¡Perdiste! Era: {pokemonName}</Text>
-          )}
+          {gameOver && <Text style={styles.lost}>💀 ¡Perdiste! Era: {pokemonName}</Text>}
           {gameWon && <Text style={styles.won}>🎉 ¡Ganaste!</Text>}
 
           {(gameOver || gameWon) && (
@@ -201,31 +170,12 @@ const styles = StyleSheet.create({
   stats: { marginBottom: 10, fontSize: 16 },
   wordContainer: { flexDirection: 'row', marginBottom: 20, flexWrap: 'wrap' },
   letter: { fontSize: 28, marginHorizontal: 4 },
-  keyboard: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  key: {
-    backgroundColor: '#eee',
-    padding: 10,
-    margin: 4,
-    borderRadius: 4,
-    width: 40,
-    alignItems: 'center',
-  },
-  keyDisabled: {
-    backgroundColor: '#ccc',
-  },
+  keyboard: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20 },
+  key: { backgroundColor: '#eee', padding: 10, margin: 4, borderRadius: 4, width: 40, alignItems: 'center' },
+  keyDisabled: { backgroundColor: '#ccc' },
   attempts: { fontSize: 16, marginBottom: 10 },
   lost: { color: 'red', fontSize: 18 },
   won: { color: 'green', fontSize: 18 },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#0066cc',
-    borderRadius: 5,
-  },
+  button: { marginTop: 10, padding: 10, backgroundColor: '#0066cc', borderRadius: 5 },
   buttonText: { color: 'white', fontWeight: 'bold' },
 });

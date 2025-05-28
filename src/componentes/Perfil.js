@@ -16,19 +16,23 @@ export default function Perfil() {
     if (!uid) return;
 
     const traerDatos = async () => {
-      const docRef = doc(db, 'usuarios', uid);
-      const docSnap = await getDoc(docRef);
+      try {
+        const docRef = doc(db, 'usuarios', uid);
+        const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setNombre(data.nombre || '');
-        setFecha(data.fecha || '');
-        setTelefono(data.telefono || '');
-      } else {
-        Alert.alert('Usuario no encontrado');
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setNombre(data.nombre || '');
+          setFecha(data.fecha || '');
+          setTelefono(data.telefono || '');
+        } else {
+          Alert.alert('Usuario no encontrado');
+        }
+      } catch (error) {
+        Alert.alert('Error al obtener datos del perfil');
+      } finally {
+        setCargando(false);
       }
-
-      setCargando(false);
     };
 
     traerDatos();
@@ -42,7 +46,6 @@ export default function Perfil() {
         fecha,
         telefono,
       });
-
       Alert.alert('Datos actualizados');
     } catch (error) {
       console.error(error);
@@ -62,12 +65,14 @@ export default function Perfil() {
         value={nombre}
         onChangeText={setNombre}
       />
+
       <TextInput
         style={styles.input}
         placeholder="Fecha de nacimiento (YYYY-MM-DD)"
         value={fecha}
         onChangeText={setFecha}
       />
+
       <TextInput
         style={styles.input}
         placeholder="Teléfono"
@@ -75,6 +80,7 @@ export default function Perfil() {
         onChangeText={setTelefono}
         keyboardType="phone-pad"
       />
+
       <Button title="Guardar cambios" onPress={actualizarDatos} />
     </View>
   );

@@ -12,7 +12,6 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, correo, contrasena);
-      // No redirigimos manualmente porque App.js ya maneja el estado del usuario
     } catch (error) {
       Alert.alert('Error al iniciar sesión', error.message);
     }
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 24,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   input: {
     borderWidth: 1,

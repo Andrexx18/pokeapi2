@@ -11,8 +11,8 @@ export default function Registro() {
   const [contrasena, setContrasena] = useState('');
   const [fecha, setFecha] = useState('');
   const [telefono, setTelefono] = useState('');
-
   const navigation = useNavigation();
+
   let ganados = 0;
   let perdidos = 0;
 
@@ -28,7 +28,7 @@ export default function Registro() {
         fecha,
         telefono,
         ganados,
-        perdidos,
+        perdidos
       });
 
       Alert.alert('Éxito', 'Usuario registrado correctamente');
@@ -44,9 +44,21 @@ export default function Registro() {
 
       <TextInput placeholder="Nombre" value={nombre} onChangeText={setNombre} style={styles.input} />
       <TextInput placeholder="Correo" value={correo} onChangeText={setCorreo} style={styles.input} />
-      <TextInput placeholder="Contraseña" value={contrasena} onChangeText={setContrasena} secureTextEntry style={styles.input} />
+      <TextInput
+        placeholder="Contraseña"
+        value={contrasena}
+        onChangeText={setContrasena}
+        secureTextEntry
+        style={styles.input}
+      />
       <TextInput placeholder="Fecha de nacimiento" value={fecha} onChangeText={setFecha} style={styles.input} />
-      <TextInput placeholder="Teléfono" value={telefono} onChangeText={setTelefono} keyboardType="phone-pad" style={styles.input} />
+      <TextInput
+        placeholder="Teléfono"
+        value={telefono}
+        onChangeText={setTelefono}
+        keyboardType="phone-pad"
+        style={styles.input}
+      />
 
       <Button title="Registrarse" onPress={handleRegistro} />
       <View style={{ marginTop: 10 }}>
@@ -59,5 +71,5 @@ export default function Registro() {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20 },
   titulo: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 12, borderRadius: 6 },
+  input: { borderWidth: 1, borderColor: '#ccc', padding: 12, marginBottom: 12, borderRadius: 6 }
 });
