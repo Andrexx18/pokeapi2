@@ -5,7 +5,7 @@ import { auth } from '../../firebase/firebaseConfig';
 
 export default function Logout() {
   useEffect(() => {
-    signOut(auth); // Cierra la sesión apenas se monta el componente
+    signOut(auth);
   }, []);
 
   return (
